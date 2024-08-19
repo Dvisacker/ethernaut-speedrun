@@ -1,0 +1,220 @@
+# Palkeoramix decompiler. 
+
+def storage:
+  pendingAdminAddress is addr at storage 0
+  adminAddress is addr at storage 1
+  stor3608 is uint256 at storage 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc
+
+def pendingAdmin(): # not payable
+  return pendingAdminAddress
+
+def admin(): # not payable
+  return adminAddress
+
+#
+#  Regular functions
+#
+
+def unknowna6376746(uint256 _param1): # not payable
+  require calldata.size - 4 >=ΓÇ▓ 32
+  require _param1 == addr(_param1)
+  pendingAdminAddress = addr(_param1)
+
+def _fallback() payable: # default function
+  delegate stor3608 with:
+     funct call.data[0 len 4]
+       gas gas_remaining wei
+      args call.data[4 len calldata.size - 4]
+  if not delegate.return_code:
+      revert with ext_call.return_data[0 len return_data.size]
+  return ext_call.return_data[0 len return_data.size]
+
+def upgradeTo(address _implementation): # not payable
+  require calldata.size - 4 >=ΓÇ▓ 32
+  require _implementation == _implementation
+  if adminAddress != caller:
+      revert with 0, 'Caller is not the admin'
+  if not ext_code.size(_implementation):
+      revert with 0x8c379a000000000000000000000000000000000000000000000000000000000, 
+                  'UpgradeableProxy: new implementation is not a contract'
+  stor3608 = _implementation
+  log Upgraded(address nextVersion=_implementation)
+
+def unknowna02fcc0a(uint256 _param1): # not payable
+  require calldata.size - 4 >=ΓÇ▓ 32
+  require _param1 == addr(_param1)
+  if adminAddress != caller:
+      revert with 0, 'Caller is not the admin'
+  if pendingAdminAddress != addr(_param1):
+      revert with 0x8c379a000000000000000000000000000000000000000000000000000000000, 
+                  'Expected new admin by the current admin is not the pending admin'
+  adminAddress = pendingAdminAddress
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Palkeoramix decompiler. 
+
+def storage:
+  owner is addr at storage 0
+  maxBalance is uint256 at storage 1
+  stor2 is mapping of uint8 at storage 2
+  balances is mapping of uint256 at storage 3
+
+def balances(address _param1): # not payable
+  require calldata.size - 4 >=ΓÇ▓ 32
+  require _param1 == _param1
+  return balances[_param1]
+
+def maxBalance(): # not payable
+  return maxBalance
+
+def owner(): # not payable
+  return owner
+
+def whitelisted(address _param1): # not payable
+  require calldata.size - 4 >=ΓÇ▓ 32
+  require _param1 == _param1
+  return bool(stor2[_param1])
+
+#
+#  Regular functions
+#
+
+def _fallback() payable: # default function
+  revert
+
+def init(uint256 _date): # not payable
+  require calldata.size - 4 >=ΓÇ▓ 32
+  if maxBalance:
+      revert with 0, 'Already initialized'
+  maxBalance = _date
+  owner = caller
+
+def setMaxBalance(uint256 _param1): # not payable
+  require calldata.size - 4 >=ΓÇ▓ 32
+  if not stor2[caller]:
+      revert with 0, 'Not whitelisted'
+  if eth.balance(this.address):
+      revert with 0, 'Contract balance is not 0'
+  maxBalance = _param1
+
+def addToWhitelist(address _account): # not payable
+  require calldata.size - 4 >=ΓÇ▓ 32
+  require _account == _account
+  if owner != caller:
+      revert with 0, 'Not the owner'
+  stor2[addr(_account)] = 1
+
+def deposit() payable: 
+  if not stor2[caller]:
+      revert with 0, 'Not whitelisted'
+  if eth.balance(this.address) > maxBalance:
+      revert with 0, 'Max balance reached'
+  if balances[caller] > !call.value:
+      revert with 0, 17
+  balances[caller] += call.value
+
+def execute(address _to, uint256 _value, bytes _data) payable: 
+  require calldata.size - 4 >=ΓÇ▓ 96
+  require _to == _to
+  require _data <= 18446744073709551615
+  require _data + 35 <ΓÇ▓ calldata.size
+  require _data.length <= 18446744073709551615
+  require _data + _data.length + 36 <= calldata.size
+  if not stor2[caller]:
+      revert with 0, 'Not whitelisted'
+  if _value > balances[caller]:
+      revert with 0, 'Insufficient balance'
+  if balances[caller] < _value:
+      revert with 0, 17
+  balances[caller] -= _value
+  call _to with:
+     value _value wei
+       gas gas_remaining wei
+      args _data[all]
+  if not ext_call.success:
+      revert with 0, 'Execution failed'
+
+def multicall(bytes[] _calls) payable: 
+  mem[64] = 96
+  require calldata.size - 4 >=ΓÇ▓ 32
+  require _calls <= 18446744073709551615
+  require _calls + 35 <ΓÇ▓ calldata.size
+  require _calls.length <= 18446744073709551615
+  require _calls + (32 * _calls.length) + 36 <= calldata.size
+  mem[0] = caller
+  mem[32] = 2
+  if not stor2[caller]:
+      revert with 0, 'Not whitelisted'
+  idx = 0
+  s = 0
+  while idx < _calls.length:
+      require cd[(_calls + (32 * idx) + 36)] <ΓÇ▓ calldata.size + -_calls - 67
+      require cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)] <= 18446744073709551615
+      require _calls + cd[(_calls + (32 * idx) + 36)] + 68 <=ΓÇ▓ calldata.size - cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]
+      _20 = mem[64]
+      mem[64] = mem[64] + ceil32(cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]) + 32
+      mem[_20] = cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]
+      mem[_20 + 32 len cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]] = call.data[_calls + cd[(_calls + (32 * idx) + 36)] + 68 len cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]]
+      mem[_20 + cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)] + 32] = 0
+      if Mask(32, 224, mem[_20 + 32]) != 0xd0e30db000000000000000000000000000000000000000000000000000000000:
+          if idx >= _calls.length:
+              revert with 0, 50
+          require cd[(_calls + (32 * idx) + 36)] <ΓÇ▓ calldata.size + -_calls - 67
+          require cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)] <= 18446744073709551615
+          require _calls + cd[(_calls + (32 * idx) + 36)] + 68 <=ΓÇ▓ calldata.size - cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]
+          mem[mem[64] len cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]] = call.data[_calls + cd[(_calls + (32 * idx) + 36)] + 68 len cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]]
+          mem[cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)] + mem[64]] = 0
+          delegate this.address with:
+               gas gas_remaining wei
+              args call.data[_calls + cd[(_calls + (32 * idx) + 36)] + 68 len cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]]
+          if return_data.size:
+              _27 = mem[64]
+              mem[64] = mem[64] + ceil32(return_data.size) + 1
+              mem[_27] = return_data.size
+              mem[_27 + 32 len return_data.size] = ext_call.return_data[0 len return_data.size]
+          if not delegate.return_code:
+              revert with 0, 'Error while delegating call'
+          if idx == -1:
+              revert with 0, 17
+          idx = idx + 1
+          s = s
+          continue 
+      if s:
+          revert with 0, 'Deposit can only be called once'
+      if idx >= _calls.length:
+          revert with 0, 50
+      require cd[(_calls + (32 * idx) + 36)] <ΓÇ▓ calldata.size + -_calls - 67
+      require cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)] <= 18446744073709551615
+      require _calls + cd[(_calls + (32 * idx) + 36)] + 68 <=ΓÇ▓ calldata.size - cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]
+      mem[mem[64] len cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]] = call.data[_calls + cd[(_calls + (32 * idx) + 36)] + 68 len cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]]
+      mem[cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)] + mem[64]] = 0
+      delegate this.address with:
+           gas gas_remaining wei
+          args call.data[_calls + cd[(_calls + (32 * idx) + 36)] + 68 len cd[(_calls + cd[(_calls + (32 * idx) + 36)] + 36)]]
+      if return_data.size:
+          _31 = mem[64]
+          mem[64] = mem[64] + ceil32(return_data.size) + 1
+          mem[_31] = return_data.size
+          mem[_31 + 32 len return_data.size] = ext_call.return_data[0 len return_data.size]
+      if not delegate.return_code:
+          revert with 0, 'Error while delegating call'
+      if idx == -1:
+          revert with 0, 17
+      idx = idx + 1
+      s = 1
+      continue 
+
+
